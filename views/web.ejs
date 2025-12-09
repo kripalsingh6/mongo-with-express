@@ -8,16 +8,26 @@
 </head>
 <body>
     <h3>All Chats</h3>
+
+    <form method="get" action="/chats/new">
+    <button>Add chat</button>
+    </form>
+    
     <hr>
     <%   for(let chat of data){ %>
     <div class="chat">
         <p> From : <i><%= chat.from %></i></p>
         <div class="msg">
             <p> <%= chat.message %></p>
+            <form method="get" action="/chats/<%= chat._id %>/edit">
+                <button>Edit</button>
+            </form>
         </div>
         
         <p> Received by <i><%= chat.to  %></i></p>
         <hr>
+        <p><%= chat.created_at.toString().split(" ")[4] %></p>
+        <p><%= chat.created_at.toString().split(" ").splice(0,4).join("-") %></p>
     </div>
     <br> <br>
 <% } %>

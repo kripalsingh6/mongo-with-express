@@ -7,10 +7,17 @@ body{
    border-radius: 15px;
    margin-top: 15px;
    display: inline-block;
+   
+   
 }
 .msg{
     background-color: dodgerblue;
     color: white;
     padding: 5px 15px;
     border-radius: 15px;
+    
+}
+.msg:hover{
+    background-color: lightblue;
+    
 }

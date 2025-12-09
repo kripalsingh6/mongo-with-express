@@ -9,6 +9,10 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.set("view engine", "ejs");
 
+const methodOverride= require("method-override");
+
+app.use(methodOverride("_method"));
+
 const chat = require("./models/chat.js");
 
 main().
@@ -33,8 +37,50 @@ async function main() {
 
 app.get("/chats",async (req,res)=>{
     let data= await chat.find();
-    console.log(data);
+    // console.log(data);
     res.render("web.ejs", {data});
+});
+
+app.get("/chats/new",(req,res)=>{
+    res.render("new.ejs");
+});
+app.post("/chats",(req,res)=>{
+    let {from,message,to}=req.body;
+
+    let allchats = new chat({
+        from:from,
+        message: message,
+        to: to,
+        created_at: new Date(),
+    });
+    allchats.
+    save().
+    then((res)=>{
+        console.log("Chat was saved");
+    })
+    .catch((err)=>{
+        console.log(err);
+    });
+    
+    res.redirect("/chats");
+});
+
+app.get("/chats/:id/edit", async (req,res)=>{
+    let {id}= req.params;
+    let chat1 = await chat.findById(id);
+    res.render("edit.ejs", {chat1});
+})
+
+app.put("/chats/:id",async(req,res)=>{
+    let {id}= req.params;
+    let { message: newMsg}=req.body;
+    let updateChat= await chat.findByIdAndUpdate(
+        id,
+        {message:newMsg}
+        ,{runValidators:true , new :true}
+    );
+    console.log(updateChat);
+    res.redirect("/chats");
 })
 
 app.get("/",(req,res)=>{
