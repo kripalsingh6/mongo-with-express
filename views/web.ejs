@@ -22,6 +22,14 @@
             <form method="get" action="/chats/<%= chat._id %>/edit">
                 <button>Edit</button>
             </form>
+           <form method="post" action="/chats/<%= chat._id %>?_method=DELETE" onsubmit= "return confirm('Are you sure you want to delete this user?')">
+            <button>Delete</button>
+           </form>
+
+           <form method="get" action="/chats/<%= chat._id %>">
+                <button>Show</button>
+            </form>
+
         </div>
         
         <p> Received by <i><%= chat.to  %></i></p>

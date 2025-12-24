@@ -12,7 +12,7 @@ async function main() {
     await mongoose.connect("mongodb://127.0.0.1:27017/whatsapp");
 }
 
- let chats=([
+ let chating=([
     {
     from: "jira",
     to: "siri",
@@ -57,4 +57,5 @@ async function main() {
 },
 ]);
 
-  chat.insertMany(chats);
+//   chat.insertMany(chats);
+module.exports = {data: chating};

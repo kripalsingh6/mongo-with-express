@@ -2,6 +2,8 @@ const express= require("express");
 const app= express();
 const mongoose=require("mongoose");
 const path = require("path");
+const Expresserror= require("./Expresserror.js");
+
 app.set("views",path.join(__dirname,"views"));
 app.use(express.urlencoded({extended : true}));
 
@@ -14,6 +16,7 @@ const methodOverride= require("method-override");
 app.use(methodOverride("_method"));
 
 const chat = require("./models/chat.js");
+const intidata= require("./init.js");
 
 main().
 then(()=>{
@@ -22,8 +25,16 @@ then(()=>{
 .catch((err)=> console.log(err));
 
 async function main() {
-    await mongoose.connect("mongodb://127.0.0.1:27017/whatsapp");
+    await mongoose.connect("mongodb://127.0.0.1:27017/Fakewhatsapp");
 }
+const initDB = async ()=>{
+    await chat.deleteMany({});
+    await chat.insertMany(intidata.data);
+
+    console.log("data is intialize");
+}
+
+initDB();
 
 // let chat1= new chat({
 //     from: "jira",
@@ -37,11 +48,12 @@ async function main() {
 
 app.get("/chats",async (req,res)=>{
     let data= await chat.find();
-    // console.log(data);
+    //  console.log(data);
     res.render("web.ejs", {data});
 });
 
 app.get("/chats/new",(req,res)=>{
+    throw new Expresserror(404, "Page not found");
     res.render("new.ejs");
 });
 app.post("/chats",(req,res)=>{
@@ -65,11 +77,21 @@ app.post("/chats",(req,res)=>{
     res.redirect("/chats");
 });
 
+app.get("/chats/:id", async (req,res,next)=>{
+    let {id}= req.params;
+    let chat1 = await chat.findById(id);
+    if(!chat1){
+      next(new Expresserror(404, "Page not found"));
+    }
+    res.render("edit.ejs", {chat1});
+});
+
+// Edit route
 app.get("/chats/:id/edit", async (req,res)=>{
     let {id}= req.params;
     let chat1 = await chat.findById(id);
     res.render("edit.ejs", {chat1});
-})
+});
 
 app.put("/chats/:id",async(req,res)=>{
     let {id}= req.params;
@@ -81,11 +103,25 @@ app.put("/chats/:id",async(req,res)=>{
     );
     console.log(updateChat);
     res.redirect("/chats");
+});
+
+// delete route
+app.delete("/chats/:id", async (req,res)=>{
+    let {id}= req.params;
+    let chatdeleted= await chat.findByIdAndDelete(id);
+    console.log(chatdeleted);
+    res.redirect("/chats")
 })
 
 app.get("/",(req,res)=>{
     res.send("server is working");
-})
+});
+
+// error handling route
+app.use((err,req,res,next)=>{
+    let {status= 500, message="some error occured"}= err;
+    res.status(status).send(message);
+});
 
 app.listen(8080,()=>{
     console.log("server is listening on port 8080");
