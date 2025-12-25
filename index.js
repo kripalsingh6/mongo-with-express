@@ -47,17 +47,23 @@ initDB();
 // });
 
 app.get("/chats",async (req,res)=>{
-    let data= await chat.find();
+    try{
+         let data= await chat.find();
     //  console.log(data);
     res.render("web.ejs", {data});
+    }
+    catch(err){
+        next(err)
+    }
+   
 });
 
 app.get("/chats/new",(req,res)=>{
-    throw new Expresserror(404, "Page not found");
+    // throw new Expresserror(404, "Page not found");
     res.render("new.ejs");
 });
-app.post("/chats",(req,res)=>{
-    let {from,message,to}=req.body;
+app.post("/chats",asyncwrap((req,res)=>{
+        let {from,message,to}=req.body;
 
     let allchats = new chat({
         from:from,
@@ -75,26 +81,35 @@ app.post("/chats",(req,res)=>{
     });
     
     res.redirect("/chats");
-});
+}));
 
-app.get("/chats/:id", async (req,res,next)=>{
+function asyncwrap(fn) {
+    return function(req,res,next){
+        fn(req,res,next).catch((err)=>{
+            next(err);
+        });
+    }
+    
+}
+app.get("/chats/:id", asyncwrap(async (req,res,next)=>{
     let {id}= req.params;
     let chat1 = await chat.findById(id);
     if(!chat1){
       next(new Expresserror(404, "Page not found"));
     }
     res.render("edit.ejs", {chat1});
-});
+}));
 
 // Edit route
-app.get("/chats/:id/edit", async (req,res)=>{
-    let {id}= req.params;
+app.get("/chats/:id/edit", asyncwrap(async (req,res)=>{
+        let {id}= req.params;
     let chat1 = await chat.findById(id);
     res.render("edit.ejs", {chat1});
-});
+}));
 
-app.put("/chats/:id",async(req,res)=>{
-    let {id}= req.params;
+app.put("/chats/:id",asyncwrap(async(req,res)=>{
+   
+     let {id}= req.params;
     let { message: newMsg}=req.body;
     let updateChat= await chat.findByIdAndUpdate(
         id,
@@ -103,15 +118,17 @@ app.put("/chats/:id",async(req,res)=>{
     );
     console.log(updateChat);
     res.redirect("/chats");
-});
+   
+}));
 
 // delete route
-app.delete("/chats/:id", async (req,res)=>{
-    let {id}= req.params;
+app.delete("/chats/:id", asyncwrap(async (req,res)=>{
+     let {id}= req.params;
     let chatdeleted= await chat.findByIdAndDelete(id);
     console.log(chatdeleted);
     res.redirect("/chats")
-})
+   
+}));
 
 app.get("/",(req,res)=>{
     res.send("server is working");
