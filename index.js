@@ -133,7 +133,18 @@ app.delete("/chats/:id", asyncwrap(async (req,res)=>{
 app.get("/",(req,res)=>{
     res.send("server is working");
 });
+const handleValidationErr= (err)=>{
+    console.log("This was a Validation error. Please follow rules");
+    console.dir(err.message);
+    return err;
+}
 
+app.use(( err , req, res, next)=>{
+    console.log(err.name);
+    if(err.name=== "ValiadationError"){
+        err= handleValidationErr(err);
+    }
+})
 // error handling route
 app.use((err,req,res,next)=>{
     let {status= 500, message="some error occured"}= err;
